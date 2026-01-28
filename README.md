@@ -5,92 +5,77 @@
 
 Real-time monitor for large trades on Polymarket with beautiful terminal UI, keyword filtering, and anomaly detection.
 
+> **Disclaimer:** This project is not affiliated with, endorsed by, or connected to Polymarket in any way. This is an independent, open-source tool that uses publicly available APIs. Use at your own risk. The authors take no responsibility for any losses, damages, or issues arising from the use of this software. This tool is for informational purposes only and should not be considered financial advice.
+
+---
+
 ## Features
 
-- **Interactive Setup Wizard** - Easy first-time configuration
-- **Beautiful Terminal UI** - Colored output with panels and tables
-- **Large Trade Monitoring** - Track trades above a configurable threshold
-- **Keyword/Topic Filtering** - Monitor only trades matching specific topics
+- **Interactive Setup Wizard** - Easy first-time configuration, no coding required
+- **Beautiful Terminal UI** - Colored output with panels, tables, and spinners
+- **Large Trade Monitoring** - Track trades above a configurable USD threshold
+- **Keyword/Topic Filtering** - Monitor only trades matching specific topics (crypto, politics, sports, etc.)
 - **Anomaly Detection** - Flag suspicious low-price + high-size trades
-- **Wallet/Username Tracking** - Monitor specific traders
-- **Discord Notifications** - Get alerts for anomalous trades
-- **CSV Export** - All trades saved with full details
+- **Wallet/Username Tracking** - Monitor specific traders by address or username
+- **Discord Notifications** - Get instant alerts for anomalous trades
+- **Customizable Refresh Rate** - Set how often to check for new trades
+- **CSV Export** - All trades automatically saved with full details
+
+---
 
 ## Quick Start
 
+### 1. Clone the repository
 ```bash
-# Clone the repository
 git clone https://github.com/yourusername/polymarket-monitor.git
 cd polymarket-monitor
+```
 
-# Create virtual environment
+### 2. Create virtual environment
+```bash
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-# Install dependencies
+### 3. Install dependencies
+```bash
 pip install -r requirements.txt
+```
 
-# Run the monitor
+### 4. Run the monitor
+```bash
 python monitor.py
 ```
 
-On first run, an interactive setup wizard will guide you through configuration.
+On first run, the **Setup Wizard** will guide you through all configuration options.
+
+---
 
 ## Setup Wizard
 
-When you run the monitor for the first time (or with `--setup`), you'll be guided through:
+When you run the monitor for the first time (or with `--setup` flag), an interactive wizard will help you configure:
 
-1. **Discord Webhook** (optional) - For receiving trade notifications
-2. **Minimum Trade Amount** - Only monitor trades above this USD value
-3. **Anomaly Criteria** - Configure what makes a trade "suspicious"
-4. **Trade Age Filter** - Ignore old trades
-5. **Keyword Filtering** - Filter by market topics (e.g., bitcoin, politics, sports)
+| Step | Setting | Description |
+|------|---------|-------------|
+| 1 | Discord Webhook | Optional - for receiving trade alerts |
+| 2 | Min Trade Amount | Only show trades above this USD value |
+| 3 | Anomaly Criteria | What makes a trade "suspicious" |
+| 4 | Max Trade Age | Ignore trades older than X minutes |
+| 5 | Keywords | Filter by topic (bitcoin, politics, etc.) |
+| 6 | Check Interval | How often to fetch new trades |
 
 All settings are saved to `.env` and loaded automatically on next run.
 
-## Keyword Filtering
-
-Filter trades by topic/theme to focus on markets you care about.
-
-### Configuration
-
-```env
-# Single topic
-KEYWORDS=bitcoin
-
-# Multiple topics (comma-separated)
-KEYWORDS=bitcoin,ethereum,crypto
-
-# Match mode
-KEYWORD_MATCH_MODE=any   # Show trades matching ANY keyword (default)
-KEYWORD_MATCH_MODE=all   # Show only trades matching ALL keywords
+To reconfigure at any time:
+```bash
+python monitor.py --setup
 ```
 
-### Examples
+---
 
-| Keywords | Match Mode | Matches |
-|----------|------------|---------|
-| `bitcoin,ethereum` | any | "Will Bitcoin hit $100k?" or "Ethereum price prediction" |
-| `trump,election` | any | "Trump wins 2024?" or "Election day results" |
-| `nba,championship` | all | Only "NBA Championship winner" (must contain both) |
+## Configuration Options
 
-Leave `KEYWORDS` empty to show all trades (no filtering).
-
-## Operating Modes
-
-### Mode 1: Large Trade Monitor
-Monitors all trades above the configured minimum amount. Discord notifications are sent only for anomalous trades.
-
-### Mode 2: Wallet/Username Tracking
-Track specific traders by:
-- **Wallet address** (0x...)
-- **Polymarket username**
-
-All trades from tracked identities are shown, regardless of amount.
-
-## Configuration
-
-Configuration is stored in `.env`. You can edit it manually or run `python monitor.py --setup`:
+All settings are stored in `.env` file. You can edit manually or use the setup wizard.
 
 ```env
 # Discord webhook URL for notifications (optional)
@@ -100,79 +85,146 @@ DISCORD_WEBHOOK=https://discord.com/api/webhooks/...
 MIN_TRADE_AMOUNT=1000
 
 # Anomaly detection criteria
-ANOMALY_PRICE_MAX=0.4
-ANOMALY_SIZE_MIN=10000
-ANOMALY_AMOUNT_MIN=500
+ANOMALY_PRICE_MAX=0.4      # Max price to flag as anomaly
+ANOMALY_SIZE_MIN=10000     # Min size to flag as anomaly
+ANOMALY_AMOUNT_MIN=500     # Min USD amount for anomaly
 
 # Maximum age of trades to consider (minutes)
 MAX_TRADE_AGE_MINUTES=30
 
-# Keyword filtering
+# Keyword filtering (comma-separated, leave empty for all trades)
 KEYWORDS=bitcoin,crypto
-KEYWORD_MATCH_MODE=any
+KEYWORD_MATCH_MODE=any     # "any" or "all"
 
-# Check interval (seconds)
+# Check interval - how often to fetch trades (seconds)
+# Lower = faster updates, more API calls
+# Recommended: 1-5 seconds
 LOOP_INTERVAL=1
 ```
 
+---
+
+## Keyword Filtering
+
+Filter trades by topic to focus on markets you care about.
+
+### Examples
+
+| Keywords | Mode | Result |
+|----------|------|--------|
+| `bitcoin,ethereum` | any | Trades mentioning Bitcoin OR Ethereum |
+| `trump,biden` | any | Trades about Trump OR Biden |
+| `nba,finals` | all | Only trades containing BOTH "nba" AND "finals" |
+| *(empty)* | - | All trades (no filter) |
+
+---
+
+## Operating Modes
+
+### Mode 1: Large Trade Monitor
+- Monitors all trades above your configured minimum amount
+- Shows trades in real-time with full details
+- Discord notifications sent **only for anomalous trades**
+
+### Mode 2: Wallet/Username Tracking
+- Track specific traders by wallet address (0x...) or Polymarket username
+- Shows **ALL trades** from tracked identities (no amount threshold)
+- Useful for following whale wallets or specific traders
+
+---
+
 ## Anomaly Detection
 
-A trade is flagged as **anomalous** when ALL of these conditions are met:
-- Price <= `ANOMALY_PRICE_MAX` (default: 0.4)
-- Size >= `ANOMALY_SIZE_MIN` (default: 10,000)
-- Amount >= `ANOMALY_AMOUNT_MIN` (default: $500)
+A trade is flagged as **ANOMALOUS** when ALL conditions are met:
+- Price ≤ `ANOMALY_PRICE_MAX` (default: 0.4 = 40%)
+- Size ≥ `ANOMALY_SIZE_MIN` (default: 10,000 shares)
+- Amount ≥ `ANOMALY_AMOUNT_MIN` (default: $500)
 
-This helps identify potentially significant bets at low prices.
+This helps identify large bets at low prices, which could indicate informed trading.
+
+---
 
 ## Output Files
 
 | File | Description |
 |------|-------------|
-| `large_trades.csv` | Log of all detected trades with timestamps |
-| `tracked_wallets.txt` | Saved wallet addresses for tracking mode |
-| `tracked_usernames.txt` | Saved usernames for tracking mode |
+| `large_trades.csv` | Log of all detected trades with full details |
+| `tracked_wallets.txt` | Saved wallet addresses (tracking mode) |
+| `tracked_usernames.txt` | Saved usernames (tracking mode) |
+| `.env` | Your configuration (auto-generated by wizard) |
+
+---
 
 ## Example Output
 
 ```
-+==================================+
-|   POLYMARKET TRADE MONITOR       |
-+==================================+
+╔══════════════════════════════════════╗
+║   POLYMARKET TRADE MONITOR           ║
+╚══════════════════════════════════════╝
 
-+------------------+----------------------+
-| Setting          | Value                |
-+------------------+----------------------+
-| Mode             | Large Trade Monitor  |
-| Min Amount       | $1,000               |
-| Anomaly          | price<=0.4, size>=10000 |
-| Keywords         | bitcoin, crypto      |
-| Match Mode       | any                  |
-| Discord          | Configured           |
-+------------------+----------------------+
+┌─────────────────┬──────────────────────┐
+│ Setting         │ Value                │
+├─────────────────┼──────────────────────┤
+│ Mode            │ Large Trade Monitor  │
+│ Min Amount      │ $1,000               │
+│ Anomaly         │ price≤0.4, size≥10k  │
+│ Keywords        │ bitcoin, crypto      │
+│ Check Interval  │ 1 second(s)          │
+│ Discord         │ Configured           │
+└─────────────────┴──────────────────────┘
+
+Starting monitor... Press Ctrl+C to stop.
 
 Received 100 trades >= $1,000
 
-+-------- Trade --------+
-| Hash    | 0x8c448b... |
-| Amount  | $5,250.00   |
-| Price   | 0.3500      |
-| Size    | 15,000.00   |
-| Market  | Will BTC... |
-| Keywords| bitcoin     |
-+-----------------------+
+┌─── ANOMALOUS TRADE DETECTED ───┐
+│ Low price: 0.35 <= 0.4         │
+│ Large size: 15,000 >= 10,000   │
+└────────────────────────────────┘
+┌────────────────────────────────┐
+│ Hash     │ 0x8c448b57ae53...   │
+│ Amount   │ $5,250.00           │
+│ Price    │ 0.3500              │
+│ Size     │ 15,000.00           │
+│ Market   │ Will BTC hit $100k? │
+│ Keywords │ bitcoin             │
+│ Trader   │ CryptoWhale42       │
+└────────────────────────────────┘
 
-Processed 3 new trade(s)
+Processed 3 new trade(s) | 1 anomalous
 ```
+
+---
 
 ## Requirements
 
 - Python 3.10+
-- Dependencies: `requests`, `python-dotenv`, `rich`
+- Dependencies (installed automatically):
+  - `requests` - HTTP requests to Polymarket API
+  - `python-dotenv` - Environment configuration
+  - `rich` - Beautiful terminal output
+
+---
+
+## Disclaimer
+
+**This project is provided "as is" without warranty of any kind.**
+
+- This tool is **NOT affiliated with Polymarket** in any way
+- The authors are **NOT responsible** for any financial losses or damages
+- This is **NOT financial advice** - use for informational purposes only
+- Use of this tool is entirely **at your own risk**
+- Always do your own research before making any trading decisions
+- Respect Polymarket's Terms of Service and API usage policies
+
+---
 
 ## License
 
-MIT License - feel free to use and modify.
+MIT License - feel free to use, modify, and distribute.
+
+---
 
 ## Contributing
 
-Pull requests are welcome! For major changes, please open an issue first.
+Pull requests are welcome! For major changes, please open an issue first to discuss.

@@ -157,7 +157,7 @@ def setup_wizard():
     console.print()
 
     # Step 5: Keyword Filtering
-    console.print("[bold cyan]Step 5/5:[/bold cyan] Keyword Filtering (Optional)")
+    console.print("[bold cyan]Step 5/6:[/bold cyan] Keyword Filtering (Optional)")
     console.print("Filter trades by market topic. Only trades containing these keywords will be shown.")
     console.print("Examples: bitcoin, trump, election, nba, ai")
     console.print()
@@ -179,6 +179,22 @@ def setup_wizard():
             choices=["any", "all"],
             default="any"
         )
+    console.print()
+
+    # Step 6: Check Interval
+    console.print("[bold cyan]Step 6/6:[/bold cyan] Check Interval")
+    console.print("How often to check for new trades (in seconds).")
+    console.print("[dim]Lower = more responsive but more API calls. Recommended: 1-5 seconds.[/dim]")
+    console.print()
+
+    loop_interval = Prompt.ask(
+        "[yellow]Check interval (seconds)[/yellow]",
+        default="1"
+    )
+    try:
+        loop_interval = max(1, int(loop_interval))  # Minimum 1 second
+    except ValueError:
+        loop_interval = 1
     console.print()
 
     # Save configuration
@@ -207,8 +223,8 @@ KEYWORDS={keywords_str}
 # Keyword match mode: "any" (match any keyword) or "all" (match all keywords)
 KEYWORD_MATCH_MODE={keyword_mode}
 
-# Check interval (seconds)
-LOOP_INTERVAL=1
+# Check interval (seconds) - how often to fetch new trades
+LOOP_INTERVAL={loop_interval}
 """
 
     with open(".env", "w") as f:
@@ -227,6 +243,7 @@ LOOP_INTERVAL=1
     summary_table.add_row("Keywords", ", ".join(keywords) if keywords else "[dim]No filter[/dim]")
     if keywords:
         summary_table.add_row("Match Mode", keyword_mode)
+    summary_table.add_row("Check Interval", f"{loop_interval} second(s)")
 
     console.print(summary_table)
     console.print()
@@ -235,7 +252,7 @@ LOOP_INTERVAL=1
 
     # Reload configuration
     load_dotenv(override=True)
-    global DISCORD_WEBHOOK, MIN_TRADE_AMOUNT, ANOMALY_PRICE_MAX, ANOMALY_SIZE_MIN, MAX_TRADE_AGE_MINUTES, KEYWORDS, KEYWORD_MATCH_MODE
+    global DISCORD_WEBHOOK, MIN_TRADE_AMOUNT, ANOMALY_PRICE_MAX, ANOMALY_SIZE_MIN, MAX_TRADE_AGE_MINUTES, KEYWORDS, KEYWORD_MATCH_MODE, LOOP_INTERVAL
     DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK", "")
     MIN_TRADE_AMOUNT = int(os.getenv("MIN_TRADE_AMOUNT", "1000"))
     ANOMALY_PRICE_MAX = float(os.getenv("ANOMALY_PRICE_MAX", "0.4"))
@@ -244,6 +261,7 @@ LOOP_INTERVAL=1
     keywords_raw = os.getenv("KEYWORDS", "")
     KEYWORDS = [k.strip().lower() for k in keywords_raw.split(",") if k.strip()]
     KEYWORD_MATCH_MODE = os.getenv("KEYWORD_MATCH_MODE", "any").lower()
+    LOOP_INTERVAL = int(os.getenv("LOOP_INTERVAL", "1"))
 
 
 def send_discord_notification(trade):
@@ -562,6 +580,7 @@ def main_loop(tracked_wallets=None, tracked_usernames=None):
         config_table.add_row("Match Mode", KEYWORD_MATCH_MODE)
     else:
         config_table.add_row("Keywords", "[dim]No filter (all topics)[/dim]")
+    config_table.add_row("Check Interval", f"{LOOP_INTERVAL} second(s)")
     config_table.add_row("Discord Webhook", "[green]Configured[/green]" if DISCORD_WEBHOOK else "[dim]Not configured[/dim]")
 
     console.print(config_table)
