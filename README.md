@@ -27,8 +27,8 @@ Real-time monitor for large trades on Polymarket with beautiful terminal UI, key
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/polymarket-monitor.git
-cd polymarket-monitor
+git clone https://github.com/simonsruggi/polymarket-trade-monitor.git
+cd polymarket-trade-monitor
 ```
 
 ### 2. Create virtual environment
