@@ -23,3 +23,6 @@ tracked_usernames.txt
 *.swp
 *.swo
 .DS_Store
+
+# Agent instructions, not part of the project
+CLAUDE.md
