@@ -231,4 +231,4 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 
 ## Support
 
-polymarket-trade-monitor is free and open source. If you find it useful, please [⭐️ star the repo](https://github.com/simonsruggi/polymarket-trade-monitor) — and if you'd like to support my open-source work, you can [💛 sponsor me on GitHub](https://github.com/sponsors/simonsruggi). Completely optional, always appreciated. 🙏
+polymarket-trade-monitor is free and open source. If you find it useful, please [⭐️ star the repo](https://github.com/simonsruggi/polymarket-trade-monitor) — and if you'd like to support my open-source work, you can [💛 sponsor me on GitHub](https://github.com/sponsors/simonsruggi) or [☕️ buy me a coffee](https://buymeacoffee.com/simonsruggi). Completely optional, always appreciated. 🙏
